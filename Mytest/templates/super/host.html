@@ -1,0 +1,91 @@
+{% extends "base/host_base.html" %}
+
+{#{% block super_href %}#}
+{#    <li><a href="#">仪表盘</a></li>#}
+{#    <li><a href="/idc/">机房管理</a></li>#}
+{#    <li><a href="/host_group/">服务器组管理</a></li>#}
+{#    <li><a href="#">用户组管理</a></li>#}
+{#    <li><a href="/add_host/">新增主机</a></li>#}
+{#    <li><a href="#">批量新增主机</a></li>#}
+{#    <li><a href="#">操作日志查询</a></li>#}
+{#{% endblock super_href %}#}
+
+{% block add_host %}
+    <div class="col-md-1 pull-right">
+        <a href="/add_host/" data-toggle="modal" class="btn btn-success pull-right">新增</a>
+    </div>
+{% endblock add_host %}
+
+{% block operation %}
+    <a href="/host/details/{{ host.id }}/">
+        <button class="btn btn-info btn-sm">
+            <i class="fa fa-pencil fa-fw" aria-hidden="true"></i>更新
+        </button>
+    </a>
+    <a class="del-row">
+        <button data-target="#myModal" data-toggle="modal" class="btn btn-danger btn-sm"><i
+                class="fa fa-trash-o fa-fw"
+                aria-hidden="true"></i>删除
+
+        </button>
+    </a>
+{% endblock operation %}
+
+{% block script %}
+    <script src="/static/Bootstrap_files/jquery.min.js"></script>
+    <script src="/static/Bootstrap_files/bootstrap.min.js"></script>
+    <script>
+        $(function () {
+            bindDel();
+            bindDelConfirm();
+        });
+        function bindDel() {
+            $('#tb').on('click', '.del-row', function () {
+                $('#delModal').modal('show');
+                $(this).parent().prevAll().each(function () {
+                    var v = $(this).text();
+                    var n = $(this).attr('na');
+                    if (n == 'host_name') {
+                        var cid = $(this).attr('cid');
+                        $("#delModal input.form-control").val(v)
+                    }
+                    if (n == 'nid') {
+                        var cid = $(this).attr('cid');
+                        $("#delModal input.ni").val(v)
+                    }
+                });
+            })
+        }
+        function bindDelConfirm() {
+            $('#delConfirm').click(function () {
+                var postData = {};
+                $('#delModal').find('input,select').each(function () {
+                    var v = $(this).val();
+                    var n = $(this).attr('name');
+                    if (n == 'gender') {
+                        if ($(this).prop('checked')) {
+                            postData[n] = v;
+                        }
+                    } else {
+                        postData[n] = v;
+                    }
+                });
+                $.ajax({
+                    type: 'DELETE',
+                    data: postData,
+                    dataType: 'JSON',
+                    success: function (arg) {
+                        console.log(arg)
+                        if (arg.status) {
+                            window.location.reload();
+                        } else {
+                            $('#errorMsg').text(arg.message);
+                        }
+
+                    }
+                })
+            });
+        }
+
+    </script>
+{% endblock script %}

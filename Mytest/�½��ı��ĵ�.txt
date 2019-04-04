@@ -1,0 +1,8 @@
+修改setting.py文件，数据库等，ALLOWED_HOSTS = []
+生成数据库
+运行Django程序，添加服务器信息
+
+运行 python back_manager.py run，可实现命令记录（Linux环境）
+
+
+

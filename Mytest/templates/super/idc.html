@@ -1,0 +1,288 @@
+{% extends "base/com_base.html" %}
+
+{% block panel_title %}
+    <div class="panel-heading">
+        <h3 class="panel-title">机房管理</h3>
+    </div>
+{% endblock panel_title %}
+
+
+{% block table %}
+    <!--表格 工具栏结束-->
+    <div class="row table-toolbar">
+        <div class="col-md-3">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search for...">
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button">Go!</button>
+            </span>
+            </div><!-- /input-group -->
+        </div><!-- /.col-lg-6 -->
+        <div class="col-md-1 pull-right">
+            <a class="btn btn-primary" id="addBtn">新增</a>
+        </div>
+    </div>
+    <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>机房</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="tb">
+        {% for group in host_group %}
+            <tr nid="{{ group.nid }}">
+                <td na="nid">{{ group.nid }}</td>     <!-- forloop.counter -->
+                <td na="group_name">{{ group.idc }}</td>
+                <td>
+                    <a class="btn btn-info btn-sm edit-row">更新</a>
+                    <a class="btn btn-danger btn-sm del-row">删除</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <!--分页开始-->
+{% endblock table %}
+
+{% block model %}
+    {#   新增主机组 #}
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">创建机房</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="fm" class="form-horizontal">
+                        <div class="form-group">
+                            <label for="username" class="col-sm-2 control-label">姓名</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="username" placeholder="姓名">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <span id="errorMsg" style="color: red;"></span>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnSave">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {#   编辑主机组 #}
+    <div class="modal fade" id="eidtModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">编辑机房</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="fm" class="form-horizontal">
+                        <input type="text" class="ni" name="nid" style="display: none"/>
+
+                        <div class="form-group">
+                            <label for="username" class="col-sm-2 control-label">姓名</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="user" placeholder="姓名">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <span id="errorMsg" style="color: red;"></span>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnEditSave">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {#    删除主机组 #}
+    <div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">删除机房</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="fm" class="form-horizontal">
+                        <input type="text" class="ni" name="nid" style="display: none"/>
+
+                        <div class="form-group">
+                            <label for="username" class="col-sm-2 control-label">姓名</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" readOnly="true" name="user" placeholder="姓名">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <span id="errorMsg" style="color: red;"></span>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="delConfirm">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% block script %}
+    <script src="/static/Bootstrap_files/jquery.min.js"></script>
+    <script src="/static/Bootstrap_files/bootstrap.min.js"></script>
+    <script>
+        $(function () {
+            bindEvent();    // 弹出新增框
+            bindSave();     // 新增框保存方法
+            bindDel();      // 弹出删除框
+            bindDelConfirm();
+            bindEdit();     // 弹出编辑框
+            bindEditConfirm();      // 编辑框保存方法
+            {#        bindTestAjaxList();#}
+        });
+        {#  该函数点击新增，弹出对话框  #}
+        function bindEvent() {
+            $('#addBtn').click(function () {
+                $('#addModal').modal('show');
+            })
+        }
+        {# 新增里面的保存按钮   #}
+        function bindSave() {
+            $('#btnSave').click(function () {
+                var postData = {};
+                $('#addModal').find('input,select').each(function () {
+                    var v = $(this).val();
+                    var n = $(this).attr('name');
+                    if (n == 'gender') {
+                        if ($(this).prop('checked')) {
+                            postData[n] = v;
+                        }
+                    } else {
+                        postData[n] = v;
+                    }
+                });
+                $.ajax({
+                    type: 'POST',
+                    data: postData,
+                    success: function (arg) {
+                        var dict = JSON.parse(arg);
+
+                        if (dict.status) {
+                            window.location.reload();       // 可以优化，减轻数据库压力
+                        } else {
+                            $('#errorMsg').text(dict.message);
+                        }
+                    }
+                })
+
+            });
+        }
+
+        function bindEdit() {
+            $('#tb').on('click', '.edit-row', function () {
+                $('#eidtModal').modal('show');
+                //1.获取当前行的所有数据
+                // 将数据赋值到对应的对话框的指定位置
+
+                $(this).parent().prevAll().each(function () {
+                    var v = $(this).text();
+                    var n = $(this).attr('na');
+                    if (n == 'group_name') {
+                        var cid = $(this).attr('cid');
+                        $("#eidtModal input.form-control").val(v)
+                    }
+                    if (n == 'nid') {
+                        var cid = $(this).attr('cid');
+                        $("#eidtModal input.ni").val(v)
+                    }
+                });
+            })
+        }
+        function bindEditConfirm() {
+            $('#btnEditSave').click(function () {
+                var postData = {};
+                $('#eidtModal').find('input,select').each(function () {
+                    var v = $(this).val();
+
+                    var n = $(this).attr('name');
+                    {#                alert(n)  {#  nid,user,null #}
+                    if (n == 'gender') {
+                        if ($(this).prop('checked')) {
+                            postData[n] = v;
+                        }
+                    } else {
+                        postData[n] = v;
+                    }
+                });
+                $.ajax({
+                    type: 'PUT',
+                    data: postData,
+                    dataType: 'JSON',
+                    success: function (arg) {
+                        if (arg.status) {
+                            window.location.reload();
+                        } else {
+                            $('#errorMsg').text(arg.message);
+                        }
+                    }
+                })
+            })
+        }
+
+        function bindDel() {
+            $('#tb').on('click', '.del-row', function () {
+                $('#delModal').modal('show');
+                $(this).parent().prevAll().each(function () {
+                    var v = $(this).text();
+                    var n = $(this).attr('na');
+                    if (n == 'group_name') {
+                        var cid = $(this).attr('cid');
+                        $("#delModal input.form-control").val(v)
+                    }
+                    if (n == 'nid') {
+                        var cid = $(this).attr('cid');
+                        $("#delModal input.ni").val(v)
+                    }
+                });
+            })
+        }
+        function bindDelConfirm() {
+        $('#delConfirm').click(function () {
+            var postData = {};
+            $('#delModal').find('input,select').each(function () {
+                    var v = $(this).val();
+                    var n = $(this).attr('name');
+                    if (n == 'gender') {
+                        if ($(this).prop('checked')) {
+                            postData[n] = v;
+                        }
+                    } else {
+                        postData[n] = v;
+                    }
+                });
+            $.ajax({
+                type: 'DELETE',
+                data: postData,
+                dataType: 'JSON',
+                success:function (arg) {
+                    console.log(arg)
+                    if(arg.status){
+                        window.location.reload();
+                    } else {
+                        $('#errorMsg').text(arg.message);
+                    }
+
+                }
+            })
+        });
+    }
+    </script>
+{% endblock script %}
+{% endblock model %}
+
+

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/Bootstrap_files/bootstrap.min.css">
+    <script src="/static/jquery-3.2.1.min.js"></script>
+    <style>
+        .errors {
+            color: red;
+        }
+    </style>
+    <title>新增用户</title>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h1>新增用户</h1>
+            <form id="my_form">
+
+                {% csrf_token %}
+                {% for foo in form_obj %}
+                    <div class="form-group">
+                        <label for="">{{ foo.label }}</label>
+                        {{ foo }} <span class="errors"></span>
+                    </div>
+                {% endfor %}
+
+                <div class="modal-footer">
+                    <input type="button" id="id_button" class="btn btn-success" value="确定">
+                    <a href="/user/">
+                        <li class="btn btn-default">返回</li>
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+    $("#id_button").click(function () {
+        var formdata = new FormData()
+        var tt = $("#my_form").serializeArray()
+        $.each(tt, function (index, value) {
+            formdata.append(value.name, value.value)
+        })
+        console.log(tt)
+
+        $.ajax({
+            url: '',
+            type: 'post',
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (data) {
+                //console.log(data)
+                if (data.user) {
+                    location.href = '/user/'
+                } else {
+                    $.each(data.msg, function (index, value) {
+                        console.log(index)
+                        console.log(value)
+                        if (index == "__all__") {
+                            $("#id_re_pwd").next().text(value[0])
+                        }
+                        $("#id_" + index).next().text(value[0]).parent().addClass('has-error')
+                    })
+                    setTimeout(function () {
+                        $(".form-group").removeClass('has-error')
+                        $('span').text("")
+                    }, 5000)
+                }
+
+            }
+
+        })
+
+    })
+</script>
+</body>
+</html>

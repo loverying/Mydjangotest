@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/Bootstrap_files/bootstrap.min.css">
+    <script src="/static/jquery-3.2.1.min.js"></script>
+    <style>
+        .errors{
+            color: red;
+        }
+    </style>
+    <title>添加主机</title>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-md-offset-4">
+            <h1>添加主机</h1>
+            <form action="/host/details/{{ details_host.id }}" method="POST">
+{#            url(r'^host/details/(?P<id>\d+)', views.HostDetails.as_view()),#}
+            {% csrf_token %}
+                <div class="form-group">
+                    <label for="">主机名</label>
+                    <input type="text" name="host_name" class="form-control" value="{{ details_host.host_name }}">
+                </div>
+                <div class="form-group">
+                    <label for="">内网IP</label>
+                    <input type="text" name="in_ip" class="form-control" value="{{ details_host.in_ip }}" >
+                </div>
+                <div class="form-group">
+                    <label for="">外网IP，没有填(null)</label>
+                    <input type="text" name="out_ip" class="form-control" value="{{ details_host.out_ip }}">
+                </div>
+                <div class="form-group">
+                    <label for="">端口</label>
+                    <input type="text" name="port" class="form-control" value="{{ details_host.port }}">
+                </div>
+                <div class="form-group">
+                    <label for="">主机用户</label>
+                    <input type="text" name="host_user" class="form-control" value="{{ details_host.user }}">
+                </div>
+                <div class="form-group">
+                    <label for="">主机密码</label>
+                    <input type="text" name="password" class="form-control" value="{{ details_host.password }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="">机房</label>
+                        <select name="idc">
+                            {% for idc in idc_list %} }}
+                                {% if idc.nid == details_host.idc.nid %} }}
+                                    <option style="color: #2e6da4" value="{{ details_host.idc.nid }}" selected="selected">{{ idc.idc }}</option>
+                                {% else %}
+                                    <option  value="{{ idc.nid }}">{{ idc.idc }}</option>
+                                {% endif %} }}
+                            {% endfor %}
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="">主机组管理</label>
+                        <select name="Host_group">
+                            {% for host_group in host_group_list %} }}
+                                {% if host_group.nid == details_host.Host_group.nid %}
+                                    <option style="color: #2e6da4" value="{{ details_host.Host_group.nid }}" selected="selected">{{ host_group.group_name }}</option>
+                                {% else %}
+                                    <option value="{{ host_group.nid }}">{{ host_group.group_name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="">用户人员管理</label>
+                        <select name="user">
+                            {% for user in user_list %} }}
+                                {% if user.nid == details_host.user.nid %} }}
+                                    <option style="color: #2e6da4" value="{{ details_host.user.nid }}" selected="selected">{{ user.username }}</option>
+                                {% else %}
+                                    <option value="{{ user.nid }}">{{ user.username }}</option>
+                                {% endif %} }}
+                            {% endfor %}
+                        </select>
+                </div>
+
+                <div class="modal-footer">
+                    <input type="submit" value="确定" class="btn btn-default">
+                    <a href="/host/">
+                        <li class="btn  btn-primary">返回</li>
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
